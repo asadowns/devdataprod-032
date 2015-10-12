@@ -1,12 +1,13 @@
 library(shiny)
+library(shinyjs)
 library(stringr)
-library(caret)
 library(randomForest)
 library(ElemStatLearn)
-library(knitr)
 
-controls <- trainControl(method="cv", 5)
-model <- train(spam ~ ., method='rf', trcontrol=controls, data=spam, ntree=5)
+set.seed(101)
+controls <- trainControl(method="cv", 5, allowParallel = TRUE)
+model <- randomForest(spam ~ ., trcontrol=controls, data=spam, ntree=500)
+
 shinyServer(
   function(input, output) {
 
@@ -19,9 +20,11 @@ shinyServer(
       words <- c()
       words <- str_match_all(input$text, "\\W?[a-zA-Z0-9]+\\W?")
       capitals <- c()
+      
       for (i in 1:length(words[[1]])) {
         capitals <- c(capitals,str_length(str_match(words[[1]][i],"[A-Z]{1,}")))
       }
+      
       capitals <- capitals[!is.na(capitals)]
       lowerInput <- tolower(input$text)
       newEmail <- list()
@@ -77,26 +80,38 @@ shinyServer(
       newEmail$A.50 <- 100*str_count(input$text,"\\(")/numWords()
       newEmail$A.51 <- 100*str_count(input$text,"\\[")/numWords()
       newEmail$A.52 <- 100*str_count(input$text,"!")/numWords()
-      newEmail$A.53 <- 100*str_count(input$text,"$")/numWords()
+      newEmail$A.53 <- 100*str_count(input$text,"\\$")/numWords()
       newEmail$A.54 <- 100*str_count(input$text,"#")/numWords()
       newEmail$A.55 <- ifelse(length(capitals)>0, mean(capitals), 0)
       newEmail$A.56 <- ifelse(length(capitals)>0, max(capitals), 0)
       newEmail$A.57 <- ifelse(length(capitals)>0, sum(capitals), 0)
       newEmail$spam <- 'PROCESSING'
+      
       if (!any(is.na(newEmail))) newEmail$spam <- toupper(toString(predict(model, newdata=newEmail)))
+      observe({
+        if (newEmail$spam == 'SPAM') {
+          shinyjs::addClass("result", "text-danger")
+          shinyjs::removeClass("result", "text-success")
+        } else if (newEmail$spam == 'EMAIL'){
+          shinyjs::addClass("result", "text-success")
+          shinyjs::removeClass("result", "text-danger")        
+          }
+      })
+      
       newEmail
     })
+    
     outputObj <- reactive({
-      output <- matrix()
-      if (!any(is.na(newEmail))) output <- matrix(newEmail, nrow=1,ncol=58, byrow=TRUE)
-      if (!any(is.na(newEmail)))colnames(output) <- colnames(spam)
+      output <- as.data.frame(emailObj())
+      colnames(output) <- c('make','address','all','3d','our','over','remove','internet','order','mail','receive','will','people','report','addresses','free','business','email','you','credit','your','font','000','money','hp','hpl','george','650','lab','labs','telnet','857','data','415','85','technology','1999','parts','pm','direct','cs','meeting','original','project','re','edu','table','conference',';','(','[','!','$','#','capital_average','capital_longest','capital_total', 'spam')
+      rownames(output) <- c('email')
       output
     })
+
     output$length <- renderText({numWords()})
-    output$mean <- renderText({emailObj()$A.54})
-    output$max <- renderText({emailObj()$A.56})
-    output$sum <- renderText({emailObj()$A.57})
-    output$test <- renderText({emailObj()$spam})
-    output$raw <- renderTable({outputObj()})
+    output$result <- renderText({emailObj()$spam})
+    output$table1 <- renderTable({outputObj()[1:19]})
+    output$table2 <- renderTable({outputObj()[20:40]})
+    output$table3 <- renderTable({outputObj()[41:57]})
   }
 )
