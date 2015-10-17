@@ -5,8 +5,7 @@ library(randomForest)
 library(ElemStatLearn)
 
 set.seed(101)
-controls <- trainControl(method="cv", 5, allowParallel = TRUE)
-model <- randomForest(spam ~ ., trcontrol=controls, data=spam, ntree=500)
+model <- randomForest(spam ~ ., data=spam, ntree=500)
 
 shinyServer(
   function(input, output) {

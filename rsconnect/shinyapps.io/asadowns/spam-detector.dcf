@@ -1,0 +1,8 @@
+name: spam-detector
+account: asadowns
+server: shinyapps.io
+bundleId: 290372
+url: https://asadowns.shinyapps.io/spam-detector
+when: 1445121541.31517
+asMultiple: FALSE
+asStatic: FALSE
