@@ -1,0 +1,47 @@
+Spam Detection in Real-Time
+========================================================
+author: Asa Downs
+date: 10.17.2015
+font-import: http://fonts.googleapis.com/css?family=Roboto+Slab
+font-family: 'Roboto Slab'
+transition:concave
+transition-speed:slow
+incremental:true
+
+Spam Today
+========================================================
+type:alert
+Accurately determining whether a piece of text from an email or website is spam is an increasingly important task. It is an integral part of some industries business model and an ancillary concern  to many other businesses and industries.
+
+Some groups in need of spam filtering:
+- <b>Consumers and businesses:</b> To avoid scams and malware. To improve productivity.
+- <b>Search Providers, Content Aggregators, and Browser/Email Providers:</b> To satisfy consumers and improve products and search results.
+- <b>Marketers, website owners, and researchers:</b> To ensure content delivery to audience.
+
+Training a Spam filter
+========================================================
+<small>We used the "spam" dataset from the "ElemStatLearn" R package to train the model below. The data is 4601 classified messages (2788 email, 1813 spam) from an employee at Hewlett-Packard (HP).</small>
+```{r getdata, message=FALSE, warning=FALSE, echo=FALSE, cache=TRUE}
+library(randomForest)
+library(ElemStatLearn)
+set.seed(101)
+model <- randomForest(spam ~ ., data=spam, ntree=500)
+model
+```
+
+The Application
+========================================================
+Our application allows users to enter the body text of an email or website. It then tests this new message against the model generated from the Spam data set. In this way, our application determines whether an email is "email" or "spam" and displays the result to the user.
+
+Users are also provided with additional details of why their text is considered spam based on the defined features of the Spam data set.
+
+The application works in real-time and will re-analyze the message as the user types so they can adjust their message to avoid being flagged as spam.
+
+The Pitch
+========================================================
+type:prompt
+Our simple application demonstrates the power of random forest models to provide real-time spam detection.
+
+This application combined with large data sets, natural language processing, and automatic feature detection would allow us to adapt the techniques presented here to create large-scale spam detection tools and models.
+
+Businesses, individuals, and marketers could all use increasingly powerful spam detection tools tailored to their use cases to improve their businesses in a robust, scalable ways. Our models would improve their accuracy over time by receiving user feedback and incorporating it into the model. This would lead to increasingly robust and accurate pre-emptive detection and filtering of spam.
